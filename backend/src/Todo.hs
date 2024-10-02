@@ -5,7 +5,8 @@ module Todo where
 import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics (Generic)
 import Servant
-import Data.Text (Text)
+import Data.Text (Text, pack)  -- pack関数をインポート
+import qualified Data.ByteString.Lazy.Char8 as BL  -- エラーメッセージ用
 
 -- Todoの型定義
 type TodoId = Int
@@ -38,8 +39,8 @@ instance FromJSON UpdateTodo
 
 -- シンプルなTodoデータのリスト（実際にはDBで管理）
 todoList :: [Todo]
-todoList = [ Todo 1 "Learn Haskell" False
-           , Todo 2 "Build a REST API" True
+todoList = [ Todo 1 (pack "Learn Haskell") False  -- StringからTextに変換
+           , Todo 2 (pack "Build a REST API") True
            ]
 
 -- Todoリストを取得
@@ -50,7 +51,7 @@ todos = return todoList
 getTodo :: TodoId -> Handler Todo
 getTodo tid = case filter (\t -> todoId t == tid) todoList of
     (t:_) -> return t
-    _     -> throwError err404 { errBody = "Todo not found" }
+    _     -> throwError err404 { errBody = BL.pack "Todo not found" }  -- ByteStringに変換
 
 -- 新規Todoを作成
 createTodo :: NewTodo -> Handler Todo
@@ -65,9 +66,8 @@ updateTodo tid update = case filter (\t -> todoId t == tid) todoList of
     (t:_) -> return t { title = maybe (title t) id (updateTitle update)
                       , done = maybe (done t) id (updateDone update)
                       }
-    _     -> throwError err404 { errBody = "Todo not found" }
+    _     -> throwError err404 { errBody = BL.pack "Todo not found" }
 
 -- Todoを削除
 deleteTodo :: TodoId -> Handler ()
 deleteTodo tid = return ()  -- 実際には削除処理が必要
-

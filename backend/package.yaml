@@ -26,6 +26,9 @@ dependencies:
 - wai
 - warp
 - aeson         # JSONエンコード/デコード
+- text
+- bytestring  # これを追加
+
 
 ghc-options:
 - -Wall
@@ -51,6 +54,12 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - backend
+    - servant
+    - servant-server
+    - warp
+    - aeson
+    - text
+    - bytestring
 
 tests:
   backend-test:
